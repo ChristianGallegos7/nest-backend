@@ -23,4 +23,11 @@ export class AuthController {
   findAll(@Request() req: Request) {
     return this.authService.findAll();
   }
+
+  //LoginReponse
+  @Get('check-token')
+  checkToken() {
+    return 'Hola mundo'
+  }
+
 }

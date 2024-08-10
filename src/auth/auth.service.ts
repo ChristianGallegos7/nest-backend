@@ -58,25 +58,33 @@ export class AuthService {
       return {
         usuarioExiste,
         token: this.getJwtToken({ id: usuarioExiste.id })
-      }
 
+      }
+      
     } catch (error) {
       console.log(error)
     }
   }
 
-  async findUserById(id: number) {
+  async findUserById(id: number): Promise<User | undefined> {
     try {
       const user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        throw new UnauthorizedException('Usuario no encontrado.');
+      }
       const { password, ...rest } = user;
-      return rest;
+      return rest as User;
     } catch (error) {
-
+      console.error('Error al encontrar usuario:', error);
+      throw new UnauthorizedException('Error al autenticar usuario.');
     }
   }
 
-  getJwtToken(payload: JWTPayload) {
-    const token = this.jwtService.sign(payload)
-    return token;
+
+  getJwtToken(payload: JWTPayload): string {
+    return this.jwtService.sign(payload);
   }
+
+
+
 }
