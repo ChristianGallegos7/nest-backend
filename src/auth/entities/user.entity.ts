@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Postulacion } from "../../empleos/entities/postulaciones.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -18,4 +19,7 @@ export class User {
 
     @Column()
     telefono: string;
+
+    @OneToMany(() => Postulacion, postulacion => postulacion.user)
+    postulaciones: Postulacion[];
 }

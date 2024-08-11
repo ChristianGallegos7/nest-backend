@@ -17,5 +17,9 @@ export class CompaniesController {
     return this.companiesService.create(createCompanyDto);
   }
 
+  @Get()
+  findAll() {
+    return this.companiesService.findAll();
+  }
 
 }
