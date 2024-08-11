@@ -1,13 +1,17 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
 import { Repository } from 'typeorm';
+import { LoginCompanyDto } from './dto/login-company.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class CompaniesService {
   constructor(
+    private jwtService: JwtService,
     @InjectRepository(Company)
     private companyRepository: Repository<Company>,
   ) { }
@@ -18,6 +22,32 @@ export class CompaniesService {
       return await this.companyRepository.save(company);
     } catch (error) {
       throw new InternalServerErrorException('Failed to create company');
+    }
+  }
+
+  async login(loginCompanyDto: LoginCompanyDto) {
+    try {
+      const { email, password } = loginCompanyDto;
+
+      const company = await this.companyRepository.findOneBy({});
+
+      if (!company) {
+        throw new UnauthorizedException('Credenciales inválidas.');
+      }
+      const isMatch = await bcrypt.compare(password, company.password);
+      if (!isMatch) {
+        throw new UnauthorizedException('Credenciales inválidas.');
+      }
+      const payload = { id: company.id, email: company.email }
+
+      const token = await this.jwtService.signAsync(payload);
+
+      delete company.password;
+
+      return { company, token };
+    } catch (error) {
+      console.error('Error al autenticar usuario:', error);
+      throw new UnauthorizedException('Error al autenticar usuario.');
     }
   }
 

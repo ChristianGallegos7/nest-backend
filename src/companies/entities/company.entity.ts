@@ -13,6 +13,12 @@ export class Company {
     ruc: string;
 
     @Column()
+    email: string;
+
+    @Column()
+    password: string;
+
+    @Column()
     address: string;
 
     @Column()

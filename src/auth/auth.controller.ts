@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '../auth/guards/auth/auth.guard'
+import { Roles } from './decorators/roles.decorador';
+import { Role } from './interfaces/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -19,15 +21,9 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Get()
-  findAll(@Request() req: Request) {
-    return this.authService.findAll();
-  }
-
-  //LoginReponse
-  @Get('check-token')
-  checkToken() {
-    return 'Hola mundo'
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 
 }

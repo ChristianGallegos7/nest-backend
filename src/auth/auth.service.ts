@@ -46,25 +46,29 @@ export class AuthService {
   }
 
   async login(loginUserDto: LoginUserDto) {
-    const { email, password } = loginUserDto;
     try {
-      const usuarioExiste = await this.userRepository.findOneBy({ email });
-      if (!usuarioExiste) throw new UnauthorizedException("El email no existe");
-
-      const verificarPassoword = await bcrypt.compare(password, usuarioExiste.password);
-      if (!verificarPassoword) throw new UnauthorizedException("La contraseña es incorrecta")
-
-
-      return {
-        usuarioExiste,
-        token: this.getJwtToken({ id: usuarioExiste.id })
-
+      const { email, password } = loginUserDto;
+      const user = await this.userRepository.findOneBy({ email });
+      if (!user) {
+        throw new UnauthorizedException('Credenciales inválidas.');
       }
-      
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        throw new UnauthorizedException('Credenciales inválidas.');
+      }
+      const payload = { id: user.id, email: user.email }
+
+      const token = await this.jwtService.signAsync(payload);
+
+      delete user.password;
+
+      return { user, token };
     } catch (error) {
-      console.log(error)
+      console.error('Error al autenticar usuario:', error);
+      throw new UnauthorizedException('Error al autenticar usuario.');
     }
   }
+
 
   async findUserById(id: number): Promise<User | undefined> {
     try {
@@ -79,12 +83,5 @@ export class AuthService {
       throw new UnauthorizedException('Error al autenticar usuario.');
     }
   }
-
-
-  getJwtToken(payload: JWTPayload): string {
-    return this.jwtService.sign(payload);
-  }
-
-
-
 }
+
