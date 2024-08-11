@@ -10,7 +10,7 @@ export class EmpleosController {
   create(@Body() createEmpleoDto: CreateEmpleoDto) {
     return this.empleosService.create(createEmpleoDto);
   }
-
+  // hola
   @Get()
   findAll() {
     return this.empleosService.findAll();
