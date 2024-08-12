@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { LoginCompanyDto } from './dto/login-company.dto';
 
 @Controller('companies')
 export class CompaniesController {
@@ -13,8 +14,8 @@ export class CompaniesController {
   }
 
   @Post('login')
-  login(@Body() createCompanyDto: CreateCompanyDto) {
-    return this.companiesService.create(createCompanyDto);
+  login(@Body() loginCompanyDto: LoginCompanyDto) {
+    return this.companiesService.login(loginCompanyDto);
   }
 
   @Get()

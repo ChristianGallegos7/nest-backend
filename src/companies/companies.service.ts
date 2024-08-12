@@ -18,36 +18,37 @@ export class CompaniesService {
 
   async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
     try {
-      const company = this.companyRepository.create(createCompanyDto);
+      const hashedPassword = await bcrypt.hash(createCompanyDto.password, 10);
+      const company = this.companyRepository.create({ ...createCompanyDto, password: hashedPassword });
       return await this.companyRepository.save(company);
     } catch (error) {
       throw new InternalServerErrorException('Failed to create company');
     }
   }
 
-  async login(loginCompanyDto: LoginCompanyDto) {
+  async login(loginCompanyDto: LoginCompanyDto): Promise<{ company: Company; token: string }> {
     try {
       const { email, password } = loginCompanyDto;
-
-      const company = await this.companyRepository.findOneBy({});
+      const company = await this.companyRepository.findOne({ where: { email } });
 
       if (!company) {
-        throw new UnauthorizedException('Credenciales inválidas.');
+        throw new UnauthorizedException('Invalid credentials.');
       }
+
       const isMatch = await bcrypt.compare(password, company.password);
       if (!isMatch) {
-        throw new UnauthorizedException('Credenciales inválidas.');
+        throw new UnauthorizedException('Invalid credentials.');
       }
-      const payload = { id: company.id, email: company.email }
 
+      const payload = { id: company.id, email: company.email };
       const token = await this.jwtService.signAsync(payload);
 
       delete company.password;
 
       return { company, token };
     } catch (error) {
-      console.error('Error al autenticar usuario:', error);
-      throw new UnauthorizedException('Error al autenticar usuario.');
+      console.error('Error authenticating company:', error);
+      throw new UnauthorizedException('Error authenticating company.');
     }
   }
 
